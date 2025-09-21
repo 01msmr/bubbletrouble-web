@@ -1,0 +1,54 @@
+Inhalt:
+  
+
+Spielbeginn:
+  [Variante 1]
+    Es wird eine Farbe weniger eingesetzt als es Spieler gibt
+      Entsprechend der Anzahl der Spieler (n) wird die Anazahl der Farben auf (n-1) festgelegt
+    Die Karten der anderen Farben werden beiseite gelegt
+  [Variante 2]
+    Es werden alle Farben eingesetzt
+  
+
+  Ein Spieler wird zum Geber bestimmt
+  Der Geber verteilt reihum Karten, bis jeder Spieler 5 Karten hat
+  Der Ziehstapel
+    Die restlichen Karten werden verdeckt als Ziehstapel auf den Tisch gelegt
+      oder: offen auf den Tisch gelegt
+  Die Ablegestapel
+    Der Geber legt die Startkarten zu den eingesetzten Farben als Ablegestapel aus
+
+  
+
+Spielablauf
+  Der Spieler nach dem Geber fängt an.
+  
+  
+  Ein Zug
+    Der Spieler zieht eine Karte vom Ziehstapel
+      Der Spieler nimmt die Karte auf die Hand
+      Der Spieler legt verdeckt (offen) eine Karte von der Hand auf den Stapel mit der passenden Farbe
+      Der Spieler entscheidet, ob er einen Stapel aufdeckt
+    Der nächste Spieler ist am Zug
+
+
+  Aufdecken eines Stapels
+    Wenn der aufgenommene Stapel als gewonnen gilt, 
+      gewinnt der aktive (aufdeckende) Spieler den Stapel
+        Alle Karten des Stapels gehen an den aktiven (aufdeckenden) Spieler
+        Hat der aktive (aufdeckende) Spieler mehr als 9 Karten, 
+          muss er Karten ablegen, bis er 9 Karten auf der Hand hat
+        Hat der aktive (aufdeckende) Spieler ganau 9 Karten, 
+          zieht der vorige Spieler eine Karte aus der Hand des aktiven (aufdeckenden) Spielers
+    andernfalls (Wenn der Stapel nicht als gewonnen gilt)
+      zieht der vorige Spielerdie Ganzzahl (0 Nachkommastellen) von 50% der Anzahl der Karten aus der Hand des aktiven (aufdeckenden) Spielers
+
+
+  Gewinn eines Stapels
+    Ein Stapel gilt als gewonnen, wenn beide dieser Bedingugnen erfüllt:
+      mehr als 60 Punkte
+      höchstens 4 Karten
+
+
+  Gewinn des Spieles
+    Hat ein Spieler Karten einer Farbe mit mindestens 120 Punkten auf der Hand, ruft der Spieler "Bubble UP" (Siegbediungung)

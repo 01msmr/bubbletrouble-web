@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bubble Trouble - Ein immersives Kartenspiel mit realistischen Effekten">
+  <title>Bubble Trouble - digitales Kartenspiel</title>
+
+  <!-- Preload kritische Ressourcen -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js" as="script">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Font für bessere Typografie -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Game Section - ohne Header -->
+    <section class="game-section" id="game">
+      <!-- Game Canvas Container - Neues Layout -->
+      <div class="game-container">
+        <!-- Linke Seite: Kartentisch -->
+        <div class="game-table">
+          <div id="game-canvas"></div>
+
+          <!-- Loading Screen -->
+          <div class="loading-screen" id="loadingScreen">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Spiel wird geladen...</p>
+          </div>
+        </div>
+
+        <!-- Rechte Seite: Controls und Stats -->
+        <div class="game-sidebar">
+          <!-- Header -->
+          <div class="game-header-sidebar">
+            <h2 class="game-title-sidebar">Bubble Trouble</h2>
+            <p class="game-subtitle-sidebar">digitales Kartenspiel</p>
+          </div>
+
+          <!-- Game Controls -->
+          <div class="game-controls-sidebar">
+            <button class="control-btn-sidebar primary" id="startBtn">Spiel starten</button>
+            <button class="control-btn-sidebar" id="pauseBtn">Pause</button>
+            <button class="control-btn-sidebar" id="resetBtn">Neustart</button>
+            <button class="control-btn-sidebar" id="muteBtn">🔊 Sound</button>
+          </div>
+
+          <!-- Game Stats -->
+          <div class="game-stats">
+            <h3 class="stats-title">Spielstand</h3>
+            <div class="stat-item">
+              <span class="stat-label">Karten im Deck:</span>
+              <span class="stat-value" id="deckCount">26</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Gespielte Karten:</span>
+              <span class="stat-value" id="playedCount">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Aktuelle Karte:</span>
+              <span class="stat-value" id="currentCard">-</span>
+            </div>
+          </div>
+
+          <!-- Tab System für Steuerung und Über -->
+          <div class="tab-system">
+            <div class="tab-headers">
+              <button class="tab-header active" data-tab="controls">Steuerung</button>
+              <button class="tab-header" data-tab="about">Über</button>
+            </div>
+
+            <div class="tab-content">
+              <!-- Controls Tab -->
+              <div class="tab-panel active" id="tab-controls">
+                <div class="stat-item">
+                  <span class="stat-label">Klick auf Deck:</span>
+                  <span class="stat-value">Karte ziehen</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">R:</span>
+                  <span class="stat-value">Neustart</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">M:</span>
+                  <span class="stat-value">Stumm</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Maus:</span>
+                  <span class="stat-value">Hover-Effekte</span>
+                </div>
+              </div>
+
+              <!-- About Tab -->
+              <div class="tab-panel" id="tab-about">
+                <p class="tab-text">
+                  Moderne Interpretation eines klassischen Kartenspiels mit Phaser.js für realistische Physik und
+                  immersive Effekte.
+                </p>
+                <div class="feature-list">
+                  <div class="feature-item-small">🎮 Realistische Physik</div>
+                  <div class="feature-item-small">✨ Visuelle Effekte</div>
+                  <div class="feature-item-small">📱 Responsive Design</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+  <script src="game.js"></script>
+
+  <script>
+    // Mobile Menu Toggle (entfernt da keine Navigation mehr da)
+
+    // Game Controls
+    document.getElementById('startBtn').addEventListener('click', function () {
+      // Loading Screen ausblenden
+      document.getElementById('loadingScreen').style.display = 'none';
+
+      // Button deaktivieren nach dem Start
+      this.disabled = true;
+      this.textContent = 'Gestartet';
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', function () {
+      // Pause-Logik hier
+      console.log('Pause geklickt');
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', function () {
+      // Reset-Logik hier
+      location.reload();
+    });
+
+    document.getElementById('muteBtn').addEventListener('click', function () {
+      const btn = this;
+      const isMuted = btn.textContent.includes('🔇');
+      btn.textContent = isMuted ? '🔊 Sound' : '🔇 Stumm';
+    });
+
+    // Keyboard Controls
+    document.addEventListener('keydown', function (event) {
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault();
+          document.getElementById('pauseBtn').click();
+          break;
+        case 'KeyR':
+          document.getElementById('resetBtn').click();
+          break;
+        case 'KeyM':
+          document.getElementById('muteBtn').click();
+          break;
+      }
+    });
+
+    // Tab System Funktionalität
+    document.querySelectorAll('.tab-header').forEach(header => {
+      header.addEventListener('click', function () {
+        const tabId = this.getAttribute('data-tab');
+
+        // Entferne active Klasse von allen Headers und Panels
+        document.querySelectorAll('.tab-header').forEach(h => h.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        // Füge active Klasse zu geklicktem Header und entsprechendem Panel hinzu
+        this.classList.add('active');
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+      });
+    });
+  </script>
+</body>
+
+</html>
