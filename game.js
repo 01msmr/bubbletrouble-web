@@ -49,6 +49,9 @@ function preload() {
 function create() {
   console.log("Game create() gestartet");
 
+  // Verstärkte Filz-Textur erstellen
+  createFeltTexture();
+
   // Create deck
   createDeck();
   shuffleDeck();
@@ -58,6 +61,67 @@ function create() {
   setupPlayArea();
 
   console.log("Game setup abgeschlossen");
+}
+
+function createFeltTexture() {
+  // Graphics-Objekt für subtile Filz-Textur
+  const graphics = gameScene.add.graphics();
+  graphics.setDepth(-100);
+
+  // Basis-Filz-Farbe
+  graphics.fillStyle(0x1e6b1e);
+  graphics.fillRect(0, 0, gameScene.cameras.main.width, gameScene.cameras.main.height);
+
+  // DEUTLICH MEHR Punkte mit erhöhtem Kontrast
+  for (let i = 0; i < 8000; i++) {
+    const x = Math.random() * gameScene.cameras.main.width;
+    const y = Math.random() * gameScene.cameras.main.height;
+    const brightness = Math.random();
+
+    if (brightness > 0.6) {
+      // Helle Punkte - erhöhter Kontrast
+      graphics.fillStyle(0x2f7f2f, 0.5);
+      graphics.fillCircle(x, y, Math.random() * 1.5);
+    } else if (brightness < 0.4) {
+      // Dunkle Punkte - erhöhter Kontrast  
+      graphics.fillStyle(0x155515, 0.6);
+      graphics.fillCircle(x, y, Math.random() * 1.2);
+    }
+  }
+
+  // 60° rotierte und skalierte Webstruktur (Faktor 2)
+  const angle = Math.PI / 3; // 60 Grad in Radiant
+  const cosAngle = Math.cos(angle);
+  const sinAngle = Math.sin(angle);
+  const spacing = 12; // Skalierung der Webstruktur (war 6, jetzt 12)
+
+  // Erste Richtung (60° rotiert)
+  graphics.lineStyle(0.5, 0x2a7a2a, 0.3);
+  for (let i = -gameScene.cameras.main.height; i < gameScene.cameras.main.width + gameScene.cameras.main.height; i += spacing) {
+    const x1 = i;
+    const y1 = 0;
+    const x2 = i + gameScene.cameras.main.height * cosAngle;
+    const y2 = gameScene.cameras.main.height * sinAngle;
+
+    graphics.lineBetween(x1, y1, x2, y2);
+  }
+
+  // Zweite Richtung (120° rotiert, senkrecht zur ersten)
+  graphics.lineStyle(0.5, 0x175717, 0.3);
+  for (let i = -gameScene.cameras.main.height; i < gameScene.cameras.main.width + gameScene.cameras.main.height; i += spacing) {
+    const x1 = i;
+    const y1 = 0;
+    const x2 = i - gameScene.cameras.main.height * cosAngle;
+    const y2 = gameScene.cameras.main.height * sinAngle;
+
+    graphics.lineBetween(x1, y1, x2, y2);
+  }
+
+  // Dritte Richtung (horizontale Linien, leicht versetzt)
+  graphics.lineStyle(0.3, 0x246824, 0.2);
+  for (let y = 0; y < gameScene.cameras.main.height; y += spacing * 1.2) {
+    graphics.lineBetween(0, y, gameScene.cameras.main.width, y);
+  }
 }
 
 function update() {
@@ -134,12 +198,41 @@ function setupDeckVisualsCSS() {
     deckSprites.push(sprite);
   });
 
-  // Vergrößerter Klick-Bereich
+  // Vergrößerter Klick-Bereich mit Doppelklick-Reset
   const clickWidth = (CARD_CONFIG.width * CARD_CONFIG.scale) * 5;
   const clickHeight = (CARD_CONFIG.height * CARD_CONFIG.scale) * 5;
   const clickArea = gameScene.add.rectangle(deckX, deckY, clickWidth, clickHeight, 0x000000, 0);
   clickArea.setInteractive();
-  clickArea.on('pointerdown', dealCard);
+
+  // Einzelklick für Karte ziehen
+  clickArea.on('pointerdown', () => {
+    if (deck.length > 0) {
+      dealCard();
+    }
+  });
+
+  // Doppelklick für Reset (nur wenn Deck leer)
+  let clickTimeout;
+  let clickCount = 0;
+
+  clickArea.on('pointerdown', () => {
+    clickCount++;
+
+    if (clickCount === 1) {
+      clickTimeout = setTimeout(() => {
+        clickCount = 0;
+      }, 300); // 300ms Fenster für Doppelklick
+    } else if (clickCount === 2) {
+      clearTimeout(clickTimeout);
+      clickCount = 0;
+
+      // Reset nur wenn Deck leer ist
+      if (deck.length === 0) {
+        resetGame();
+      }
+    }
+  });
+
   clickArea.on('pointerover', () => gameScene.input.setDefaultCursor('pointer'));
   clickArea.on('pointerout', () => gameScene.input.setDefaultCursor('default'));
 
@@ -207,10 +300,11 @@ function createCardSprite(cardData, x, y, isFront) {
   // Zufällige Rotation
   container.setRotation((Math.random() - 0.5) * 0.1);
 
-  // Schatten
-  const shadow = gameScene.add.image(3, 3, 'card-shadow')
+  // Verstärkter Schatten rechts und unten (angepasste Größe)
+  const shadow = gameScene.add.image(6, 7, 'card-shadow')
     .setScale(CARD_CONFIG.scale)
-    .setAlpha(0.5);
+    .setTint(0x333333) // Dunkelgrau statt schwarz
+    .setAlpha(0.6);
   container.add(shadow);
 
   if (isFront) {
@@ -256,12 +350,12 @@ function dealCard() {
   const playX = gameScene.cameras.main.width * 0.3;
   const playY = gameScene.cameras.main.height * 0.5;
 
-  // Position für Stapel berechnen
+  // Position für Stapel berechnen (weniger weit nach rechts)
   const stackIndex = playSprites.length;
-  const finalX = playX + (stackIndex * 2);
+  const finalX = playX + (stackIndex * 1); // War 2, jetzt 1
   const finalY = playY + (stackIndex * 1);
 
-  const newSprite = createCardSprite(card, playX + 200, playY, true);
+  const newSprite = createCardSprite(card, playX + 180, playY - 25, true);
 
   // WICHTIG: Neue Karte über Pseudokarte setzen
   newSprite.setDepth(playSprites.length + 1);
@@ -305,7 +399,54 @@ function updateUI() {
   if (currentCard && playDeck.length > 0) {
     const lastCard = playDeck[playDeck.length - 1];
     currentCard.textContent = `${lastCard.color} ${lastCard.value}`;
+  } else if (currentCard) {
+    currentCard.textContent = '-';
   }
+}
+
+function resetGame() {
+  console.log("Spiel wird zurückgesetzt...");
+
+  // Alle Sprites zerstören
+  deckSprites.forEach(sprite => sprite.destroy());
+  playSprites.forEach(sprite => sprite.destroy());
+
+  // Arrays leeren
+  deckSprites = [];
+  playSprites = [];
+  playDeck = [];
+
+  // Deck neu erstellen
+  createDeck();
+  shuffleDeck();
+
+  // Deck-Sprites neu erstellen
+  const deckX = gameScene.cameras.main.width * 0.8;
+  const deckY = gameScene.cameras.main.height * 0.5;
+
+  deck.forEach((card, index) => {
+    const sprite = createCardSprite(card, deckX, deckY, false);
+    sprite.x += index * 0.5;
+    sprite.y -= index * 0.3;
+    sprite.setDepth(index + 1);
+    deckSprites.push(sprite);
+  });
+
+  // CSS-Overlays aktualisieren
+  const deckOverlay = document.getElementById('deck-area-overlay');
+  if (deckOverlay) {
+    deckOverlay.style.display = 'none'; // Deck ist nicht leer
+  }
+
+  const playOverlay = document.getElementById('play-area-overlay');
+  if (playOverlay) {
+    playOverlay.style.display = 'block'; // Ablagestapel ist leer
+  }
+
+  // UI aktualisieren
+  updateUI();
+
+  console.log("Spiel zurückgesetzt!");
 }
 
 // Game initialization
